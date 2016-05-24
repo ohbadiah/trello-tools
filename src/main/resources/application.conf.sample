@@ -1,0 +1,5 @@
+trello-api {
+  token="your token"
+  key="your key"
+  boardId="the board id"
+}
