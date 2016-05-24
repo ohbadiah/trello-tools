@@ -18,7 +18,6 @@ object TrelloApi extends Directives with TrelloJsonSupport {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
-
   implicit class EasyQueryParams(req: HttpRequest) {
     def withParam(tup: (String, String)): HttpRequest = req.withUri(
         req.uri.withQuery(
