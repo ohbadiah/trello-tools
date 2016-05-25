@@ -17,13 +17,13 @@ object TrelloL extends App {
     Future.sequence(
       board.lists.filter { list: TrelloList =>
         !list.name.contains(month)
-      }.map{ l => TrelloApi.archiveList(l)}
+      }.map(TrelloApi.archiveList)
     )
   }
 
   override def main(args: Array[String]): Unit = {
     awaitIt(
-      TrelloApi.getBoard().flatMap{ board => archiveOldLists(board) }
+      TrelloApi.getBoard().flatMap(archiveOldLists)
     ).foreach {println}
 
     TrelloApi.system.shutdown()
