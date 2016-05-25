@@ -30,14 +30,6 @@ object TrelloApi extends Directives with TrelloJsonSupport {
       .withParam(("token" -> conf.getString("trello-api.token")))
   }
 
-  def addQueryParam(key: String, value: String, req: HttpRequest): HttpRequest = {
-    req.withUri(
-      req.uri.withQuery(
-        (key -> value) +: req.uri.query()
-      )
-    )
-  }
-
   def awaitIt[T](f: Future[T]): T = {
     Await.result(f, Duration(10, MINUTES))
   }
