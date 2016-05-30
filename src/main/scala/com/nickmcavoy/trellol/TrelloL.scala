@@ -1,9 +1,12 @@
 package com.nickmcavoy.trellol
 
+import java.time.LocalDate
+
 import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, MINUTES}
 import scala.concurrent.ExecutionContext.Implicits.global
+import CalendarFun._
 
 import com.typesafe.config.{ConfigFactory, Config}
 
@@ -12,19 +15,31 @@ object TrelloL extends App {
     Await.result(f, Duration(10, MINUTES))
   }
 
-  def archiveOldLists(board: TrelloBoard): Future[Seq[Boolean]] = {
+  def sortListsByDateDesc(board: TrelloBoard): Future[TrelloBoard] = {
+    Future.sequence(
+      board.lists
+       .sortBy{ _.date}
+       .reverse
+       .zipWithIndex
+       .map{ case (list: TrelloList, index: Int) =>
+         TrelloApi.positionList(list, index+1)
+       }
+    ).flatMap(_ => TrelloApi.getBoard)
+  }
+
+  def archiveOldLists(board: TrelloBoard): Future[TrelloBoard] = {
     val month: String = CalendarFun.currentMonth()
     Future.sequence(
       board.lists.filter { list: TrelloList =>
         !list.name.contains(month)
       }.map(TrelloApi.archiveList)
-    )
+    ).flatMap(_ => TrelloApi.getBoard)
   }
 
   override def main(args: Array[String]): Unit = {
     awaitIt(
-      TrelloApi.getBoard().flatMap(archiveOldLists)
-    ).foreach {println}
+      TrelloApi.getBoard().flatMap(archiveOldLists).flatMap(sortListsByDateDesc)
+    ).lists.foreach {l => println(s"${l.date}")}
 
     TrelloApi.system.shutdown()
 

@@ -27,12 +27,20 @@ object TrelloApi extends TrelloJsonSupport {
       .withParam(("token" -> conf.getString("trello-api.token")))
   }
 
-  def archiveList(list: TrelloList): Future[Boolean] = {
+  def archiveList(list: TrelloList): Future[TrelloList] = {
     val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/lists/${list.id}/closed")
       .withMethod(HttpMethods.PUT)
       .authenticate()
       .withParam("value", "true")
-    Http().singleRequest(request).map{ _ => true }.recover{ case t: Throwable => false }
+      Http().singleRequest(request).map{ _ => list }
+  }
+
+  def positionList(list: TrelloList, pos: Int): Future[TrelloList] = {
+    val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/lists/${list.id}/pos")
+      .withMethod(HttpMethods.PUT)
+      .authenticate()
+      .withParam("value", s"$pos")
+    Http().singleRequest(request).map{ _ => list }
   }
 
   def getBoard(): Future[TrelloBoard] = {
@@ -40,7 +48,7 @@ object TrelloApi extends TrelloJsonSupport {
     val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/boards/$boardId")
       .authenticate()
       .withParam("lists", "open")
-      .withParam("list_fields", "name")
+      .withParam("list_fields", "name,pos")
     Http().singleRequest(request).flatMap{ resp: HttpResponse =>
       Unmarshal(resp).to[TrelloBoard]
     }
