@@ -28,21 +28,18 @@ object TrelloL extends App {
   }
 
   def archiveOldLists(board: TrelloBoard): Future[TrelloBoard] = {
-    val month: String = CalendarFun.currentMonth()
     Future.sequence(
       board.lists.filter { list: TrelloList =>
-        !list.name.contains(month)
+        daysSince(list.date) > 21
       }.map(TrelloApi.archiveList)
     ).flatMap(_ => TrelloApi.getBoard)
   }
 
-  override def main(args: Array[String]): Unit = {
-    awaitIt(
-      TrelloApi.getBoard().flatMap(archiveOldLists).flatMap(sortListsByDateDesc)
-    ).lists.foreach {l => println(s"${l.date}")}
+  awaitIt(
+    TrelloApi.getBoard().flatMap(archiveOldLists).flatMap(sortListsByDateDesc)
+  ).lists.foreach {l => println(s"${l.date}")}
 
-    TrelloApi.system.shutdown()
+  TrelloApi.system.terminate()
 
-  }
 
 }
