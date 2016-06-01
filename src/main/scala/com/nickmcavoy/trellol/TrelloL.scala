@@ -27,6 +27,21 @@ object TrelloL extends App {
     ).flatMap(_ => TrelloApi.getBoard)
   }
 
+  def ensureUntilSaturday(board: TrelloBoard): Future[TrelloBoard] = {
+    val dateSet: Set[LocalDate] = board.lists.map{_.date}.toSet
+    untilSaturday().filter{
+      !dateSet.contains(_)
+    } match {
+      //Nothing to do if we don't need to create any new lists.
+      case Nil => Future.successful(board)
+      // Create new lists and refetch board.
+      case ls: Seq[LocalDate] => Future.sequence(
+          ls.map{listPresentationFormat.format(_)}
+            .map(TrelloApi.createList(board)_)
+        ).flatMap(_ => TrelloApi.getBoard)
+    }
+  }
+
   def archiveOldLists(board: TrelloBoard): Future[TrelloBoard] = {
     Future.sequence(
       board.lists.filter { list: TrelloList =>
@@ -36,7 +51,10 @@ object TrelloL extends App {
   }
 
   awaitIt(
-    TrelloApi.getBoard().flatMap(archiveOldLists).flatMap(sortListsByDateDesc)
+    TrelloApi.getBoard()
+      .flatMap(archiveOldLists)
+      .flatMap(ensureUntilSaturday)
+      .flatMap(sortListsByDateDesc)
   ).lists.foreach {l => println(s"${l.date}")}
 
   TrelloApi.system.terminate()

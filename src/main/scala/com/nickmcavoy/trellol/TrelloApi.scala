@@ -40,7 +40,16 @@ object TrelloApi extends TrelloJsonSupport {
       .withMethod(HttpMethods.PUT)
       .authenticate()
       .withParam("value", s"$pos")
-    Http().singleRequest(request).map{ _ => list }
+    Http().singleRequest(request).flatMap{Unmarshal(_).to[TrelloList]}
+  }
+
+  def createList(board: TrelloBoard)(listName: String): Future[TrelloList] = {
+    val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/lists")
+      .withMethod(HttpMethods.POST)
+      .authenticate()
+      .withParam("idBoard", board.id)
+      .withParam("name", listName)
+      Http().singleRequest(request).flatMap{Unmarshal(_).to[TrelloList]}
   }
 
   def getBoard(): Future[TrelloBoard] = {
