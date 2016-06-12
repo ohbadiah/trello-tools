@@ -1,5 +1,14 @@
-trello-api {
-  token="your token"
-  key="your key"
-  boardId="the board id"
+trellol {
+  trello-api {
+    token="your token"
+    key="your key"
+  }
+
+  timekeeping {
+    boardId="the board id"
+  }
+
+  guestlist {
+    boardId="the board id"
+  }
 }

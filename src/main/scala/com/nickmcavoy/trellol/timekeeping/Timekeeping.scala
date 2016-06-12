@@ -1,4 +1,4 @@
-package com.nickmcavoy.trellol
+package com.nickmcavoy.trellol.timekeeping
 
 import java.time.LocalDate
 
@@ -6,11 +6,13 @@ import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, MINUTES}
 import scala.concurrent.ExecutionContext.Implicits.global
-import CalendarFun._
 
 import com.typesafe.config.{ConfigFactory, Config}
 
-object TrelloL extends App {
+import com.nickmcavoy.trellol.core._
+import CalendarFun._
+
+object Timekeeping extends App {
   def awaitIt[T](f: Future[T]): T = {
     Await.result(f, Duration(10, MINUTES))
   }

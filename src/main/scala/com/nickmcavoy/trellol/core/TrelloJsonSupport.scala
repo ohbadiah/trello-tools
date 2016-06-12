@@ -1,4 +1,4 @@
-package com.nickmcavoy.trellol
+package com.nickmcavoy.trellol.core
 
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport

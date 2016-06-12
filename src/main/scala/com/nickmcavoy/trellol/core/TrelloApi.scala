@@ -1,4 +1,4 @@
-package com.nickmcavoy.trellol
+package com.nickmcavoy.trellol.core
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -23,8 +23,8 @@ object TrelloApi extends TrelloJsonSupport {
         )
       )
     def authenticate(): HttpRequest = req
-      .withParam(("key" -> conf.getString("trello-api.key")))
-      .withParam(("token" -> conf.getString("trello-api.token")))
+      .withParam(("key" -> conf.getString("trellol.trello-api.key")))
+      .withParam(("token" -> conf.getString("trellol.trello-api.token")))
   }
 
   def archiveList(list: TrelloList): Future[TrelloList] = {
@@ -53,7 +53,7 @@ object TrelloApi extends TrelloJsonSupport {
   }
 
   def getBoard(): Future[TrelloBoard] = {
-    val boardId: String = conf.getString("trello-api.boardId")
+    val boardId: String = conf.getString("trellol.timekeeping.boardId")
     val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/boards/$boardId")
       .authenticate()
       .withParam("lists", "open")
