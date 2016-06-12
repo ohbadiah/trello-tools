@@ -43,6 +43,14 @@ object TrelloApi extends TrelloJsonSupport {
     Http().singleRequest(request).flatMap{Unmarshal(_).to[TrelloList]}
   }
 
+  def getList(listId: String): Future[TrelloListFull] = {
+    val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/lists/${listId}")
+      .authenticate()
+      .withParam("cards", "open")
+      .withParam("card_fields", "name,id,pos,labels")
+    Http().singleRequest(request).flatMap{Unmarshal(_).to[TrelloListFull]}
+  }
+
   def createList(board: TrelloBoard)(listName: String): Future[TrelloList] = {
     val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/lists")
       .withMethod(HttpMethods.POST)
@@ -52,8 +60,7 @@ object TrelloApi extends TrelloJsonSupport {
       Http().singleRequest(request).flatMap{Unmarshal(_).to[TrelloList]}
   }
 
-  def getBoard(): Future[TrelloBoard] = {
-    val boardId: String = conf.getString("trellol.timekeeping.boardId")
+  def getBoard(boardId: String): Future[TrelloBoard] = {
     val request: HttpRequest = HttpRequest(uri = s"https://api.trello.com/1/boards/$boardId")
       .authenticate()
       .withParam("lists", "open")

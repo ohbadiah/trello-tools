@@ -12,8 +12,16 @@ import com.typesafe.config.{ConfigFactory, Config}
 import CalendarFun._
 
 object Timekeeping extends App {
+  val conf: Config = ConfigFactory.load()
+  val boardId: String = conf.getString("trellol.timekeeping.boardId")
+  
   def awaitIt[T](f: Future[T]): T = {
     Await.result(f, Duration(10, MINUTES))
+  }
+  implicit class DaysTime(l: TrelloList) {
+    def date(): LocalDate = {
+      parseListName(l.name)
+    }
   }
 
   def sortListsByDateDesc(board: TrelloBoard): Future[TrelloBoard] = {
@@ -25,7 +33,7 @@ object Timekeeping extends App {
        .map{ case (list: TrelloList, index: Int) =>
          TrelloApi.positionList(list, index+1)
        }
-    ).flatMap(_ => TrelloApi.getBoard)
+    ).flatMap(_ => TrelloApi.getBoard(boardId))
   }
 
   def ensureUntilSaturday(board: TrelloBoard): Future[TrelloBoard] = {
@@ -39,7 +47,7 @@ object Timekeeping extends App {
       case ls: Seq[LocalDate] => Future.sequence(
           ls.map{listPresentationFormat.format(_)}
             .map(TrelloApi.createList(board)_)
-        ).flatMap(_ => TrelloApi.getBoard)
+        ).flatMap(_ => TrelloApi.getBoard(boardId))
     }
   }
 
@@ -48,11 +56,11 @@ object Timekeeping extends App {
       board.lists.filter { list: TrelloList =>
         daysSince(list.date) > 21
       }.map(TrelloApi.archiveList)
-    ).flatMap(_ => TrelloApi.getBoard)
+    ).flatMap(_ => TrelloApi.getBoard(boardId))
   }
 
   awaitIt(
-    TrelloApi.getBoard()
+    TrelloApi.getBoard(boardId)
       .flatMap(archiveOldLists)
       .flatMap(ensureUntilSaturday)
       .flatMap(sortListsByDateDesc)

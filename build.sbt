@@ -25,7 +25,8 @@ lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(
     name := "trellol"
-  )
+  ).
+  aggregate(core, timekeeping, guestlist)
 
 libraryDependencies in Global ++= List(
   "com.typesafe.akka"      %% "akka-http-core"                    % "2.4.6",
