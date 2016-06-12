@@ -23,7 +23,11 @@ object Guestlist extends App {
     .flatMap(allFullLists)
 
   fullBoard.onSuccess{ case lists: Seq[TrelloListFull] => 
-    lists.flatMap(_.cards).map(_.name).foreach(println)
+    val guestlist = lists.flatMap(_.cards).map{c: TrelloCard => Guests.parse(c.name)}
+    val guestTotal: Int = guestlist.filter{_.isRight}.map{_.right.get.numberOfPeople}.reduceLeft{_ + _}
+    println("Couldn't parse: ")
+    guestlist.filter{_.isLeft}.foreach(println)
+    println(s"Total of $guestTotal guests")
   }
   fullBoard.onComplete { case _ => 
     TrelloApi.system.terminate() 

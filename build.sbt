@@ -34,6 +34,8 @@ libraryDependencies in Global ++= List(
   "com.typesafe.akka"      %% "akka-slf4j"                        % "2.4.6",
   "com.typesafe.akka"      %% "akka-actor"                        % "2.4.6",
   "org.scala-lang.modules" %% "scala-parser-combinators"          % "1.0.4",
-  "com.typesafe"           %  "config"                            % "1.3.0"
+  "com.typesafe"           %  "config"                            % "1.3.0",
+  "org.scalactic"          %% "scalactic"                         % "2.2.6",
+  "org.scalatest"          %% "scalatest"                         % "2.2.6" % "test"
 )
 scalacOptions in Global := Seq("-feature", "-deprecation", "-language:implicitConversions")
