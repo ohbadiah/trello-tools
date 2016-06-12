@@ -1,4 +1,4 @@
-package com.nickmcavoy.trellol.core
+package trellol
 
 import java.time.format.DateTimeFormatter
 import java.text.SimpleDateFormat

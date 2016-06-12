@@ -1,0 +1,5 @@
+trellol {
+  guestlist {
+    boardId="the board id"
+  }
+}

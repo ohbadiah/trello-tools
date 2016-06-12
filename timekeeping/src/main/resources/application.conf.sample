@@ -1,0 +1,5 @@
+trellol {
+  timekeeping {
+    boardId="the board id"
+  }
+}

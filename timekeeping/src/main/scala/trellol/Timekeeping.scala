@@ -1,4 +1,4 @@
-package com.nickmcavoy.trellol.timekeeping
+package trellol
 
 import java.time.LocalDate
 
@@ -9,7 +9,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import com.typesafe.config.{ConfigFactory, Config}
 
-import com.nickmcavoy.trellol.core._
 import CalendarFun._
 
 object Timekeeping extends App {

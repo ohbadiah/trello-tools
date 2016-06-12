@@ -1,4 +1,4 @@
-package com.nickmcavoy.trellol.core
+package trellol
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
