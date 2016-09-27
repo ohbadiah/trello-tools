@@ -38,7 +38,7 @@ object Timekeeping extends App {
 
   def ensureUntilSaturday(board: TrelloBoard): Future[TrelloBoard] = {
     val dateSet: Set[LocalDate] = board.lists.map{_.date}.toSet
-    untilSaturday().filter{
+    thisWeek().filter{
       !dateSet.contains(_)
     } match {
       //Nothing to do if we don't need to create any new lists.

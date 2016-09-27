@@ -18,9 +18,14 @@ object CalendarFun {
     d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  //Days from today until Saturday, inclusive. Excludes Sunday.
-  def untilSaturday(nextDay: LocalDate = cal.getTime()): Seq[LocalDate] = {
-    Stream.iterate(nextDay){ nd: LocalDate => DAYS.addTo(nd, 1) }
+  def lastMonday(today: LocalDate): LocalDate = today.getDayOfWeek() match {
+    case DayOfWeek.MONDAY => today
+    case _ => lastMonday(DAYS.addTo(today, -1))
+  }
+  
+  //Days from this week's Monday until Saturday, inclusive.
+  def thisWeek(nextDay: LocalDate = cal.getTime()): Seq[LocalDate] = {
+    Stream.iterate(lastMonday(nextDay)){ nd: LocalDate => DAYS.addTo(nd, 1) }
       .takeWhile{ _.getDayOfWeek() != DayOfWeek.SUNDAY }
   }
 
