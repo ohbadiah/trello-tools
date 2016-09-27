@@ -1,5 +1,10 @@
 trellol {
   timekeeping {
-    boardId="the board id"
+   boards=[
+    {// The first board
+      id="the board id", 
+      //The full names of all intended days of the week 
+      days=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]}
+    ]
   }
 }

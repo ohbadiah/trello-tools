@@ -2,18 +2,18 @@ package trellol
 
 import java.time.LocalDate
 
+import collection.JavaConversions._
 import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, MINUTES}
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import com.typesafe.config.{ConfigFactory, Config}
 
 import CalendarFun._
 
 object Timekeeping extends App {
   val conf: Config = ConfigFactory.load()
-  val boardId: String = conf.getString("trellol.timekeeping.boardId")
+  val boardIds: Seq[String] = conf.getStringList("trellol.timekeeping.boardId").toSeq
   
   def awaitIt[T](f: Future[T]): T = {
     Await.result(f, Duration(10, MINUTES))
@@ -33,7 +33,7 @@ object Timekeeping extends App {
        .map{ case (list: TrelloList, index: Int) =>
          TrelloApi.positionList(list, index+1)
        }
-    ).flatMap(_ => TrelloApi.getBoard(boardId))
+    ).flatMap(_ => TrelloApi.getBoard(board.id))
   }
 
   def ensureUntilSaturday(board: TrelloBoard): Future[TrelloBoard] = {
@@ -47,7 +47,7 @@ object Timekeeping extends App {
       case ls: Seq[LocalDate] => Future.sequence(
           ls.map{listPresentationFormat.format(_)}
             .map(TrelloApi.createList(board)_)
-        ).flatMap(_ => TrelloApi.getBoard(boardId))
+        ).flatMap(_ => TrelloApi.getBoard(board.id))
     }
   }
 
@@ -56,15 +56,18 @@ object Timekeeping extends App {
       board.lists.filter { list: TrelloList =>
         daysSince(list.date) > 21
       }.map(TrelloApi.archiveList)
-    ).flatMap(_ => TrelloApi.getBoard(boardId))
+    ).flatMap(_ => TrelloApi.getBoard(board.id))
   }
 
-  awaitIt(
-    TrelloApi.getBoard(boardId)
-      .flatMap(archiveOldLists)
-      .flatMap(ensureUntilSaturday)
-      .flatMap(sortListsByDateDesc)
-  ).lists.foreach {l => println(s"${l.date}")}
+  boardIds.foreach { boardId: String => 
+
+    awaitIt(
+      TrelloApi.getBoard(boardId)
+        .flatMap(archiveOldLists)
+        .flatMap(ensureUntilSaturday)
+        .flatMap(sortListsByDateDesc)
+    ).lists.foreach {l => println(s"${l.date}")}
+  }
 
   TrelloApi.system.terminate()
 
