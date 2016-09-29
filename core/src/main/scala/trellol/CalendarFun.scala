@@ -23,10 +23,10 @@ object CalendarFun {
     case _ => lastMonday(DAYS.addTo(today, -1))
   }
   
-  //Days from this week's Monday until Saturday, inclusive.
+  //Days from this week's Sunday until Saturday, inclusive.
   def thisWeek(nextDay: LocalDate = cal.getTime()): Seq[LocalDate] = {
     Stream.iterate(lastMonday(nextDay)){ nd: LocalDate => DAYS.addTo(nd, 1) }
-      .takeWhile{ _.getDayOfWeek() != DayOfWeek.SUNDAY }
+      .takeWhile{ _.getDayOfWeek() != DayOfWeek.SATURDAY }
   }
 
   def parseListName(listName: String): LocalDate = {

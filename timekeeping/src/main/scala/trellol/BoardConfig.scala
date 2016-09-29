@@ -1,4 +1,4 @@
-package trellol.timekeeping
+package trellol
 
 import com.typesafe.config.{Config}
 import collection.JavaConversions._
@@ -10,7 +10,7 @@ object BoardConf {
 
   def fromConfig(conf: Config): BoardConf = {
     BoardConf(conf.getString("id"),
-      conf.getStringList("days").toSet.map(DayOfWeek.valueOf _)
+      conf.getStringList("days").toSet.map{s: String => DayOfWeek.valueOf(s.toUpperCase)}
     )
   }
 

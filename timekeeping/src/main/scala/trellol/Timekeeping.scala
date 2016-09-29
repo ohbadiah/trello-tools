@@ -8,12 +8,13 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, MINUTES}
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.typesafe.config.{ConfigFactory, Config}
+import java.time.{DayOfWeek}
 
 import CalendarFun._
 
 object Timekeeping extends App {
   val conf: Config = ConfigFactory.load()
-  val boardIds: Seq[String] = conf.getStringList("trellol.timekeeping.boardId").toSeq
+  val boards: Seq[BoardConf] = conf.getConfigList("trellol.timekeeping.boards").toSeq.map{ BoardConf.fromConfig }
   
   def awaitIt[T](f: Future[T]): T = {
     Await.result(f, Duration(10, MINUTES))
@@ -36,10 +37,11 @@ object Timekeeping extends App {
     ).flatMap(_ => TrelloApi.getBoard(board.id))
   }
 
-  def ensureUntilSaturday(board: TrelloBoard): Future[TrelloBoard] = {
+  def ensureWeek(days: Set[DayOfWeek])(board: TrelloBoard): Future[TrelloBoard] = {
     val dateSet: Set[LocalDate] = board.lists.map{_.date}.toSet
-    thisWeek().filter{
-      !dateSet.contains(_)
+    thisWeek().filter{ day: LocalDate =>
+      !dateSet.contains(day) &&
+      days.contains(day.getDayOfWeek)
     } match {
       //Nothing to do if we don't need to create any new lists.
       case Nil => Future.successful(board)
@@ -59,12 +61,12 @@ object Timekeeping extends App {
     ).flatMap(_ => TrelloApi.getBoard(board.id))
   }
 
-  boardIds.foreach { boardId: String => 
+  boards.foreach { bconf: BoardConf =>
 
     awaitIt(
-      TrelloApi.getBoard(boardId)
+      TrelloApi.getBoard(bconf.id)
         .flatMap(archiveOldLists)
-        .flatMap(ensureUntilSaturday)
+        .flatMap(ensureWeek(bconf.days)_)
         .flatMap(sortListsByDateDesc)
     ).lists.foreach {l => println(s"${l.date}")}
   }
