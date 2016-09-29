@@ -18,15 +18,15 @@ object CalendarFun {
     d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def lastMonday(today: LocalDate): LocalDate = today.getDayOfWeek() match {
-    case DayOfWeek.MONDAY => today
-    case _ => lastMonday(DAYS.addTo(today, -1))
+  def lastSunday(today: LocalDate): LocalDate = today.getDayOfWeek() match {
+    case DayOfWeek.SUNDAY => today
+    case _ => lastSunday(DAYS.addTo(today, -1))
   }
   
   //Days from this week's Sunday until Saturday, inclusive.
   def thisWeek(nextDay: LocalDate = cal.getTime()): Seq[LocalDate] = {
-    Stream.iterate(lastMonday(nextDay)){ nd: LocalDate => DAYS.addTo(nd, 1) }
-      .takeWhile{ _.getDayOfWeek() != DayOfWeek.SATURDAY }
+    Stream.iterate(lastSunday(nextDay)){ nd: LocalDate => DAYS.addTo(nd, 1) }
+      .take(7)
   }
 
   def parseListName(listName: String): LocalDate = {
